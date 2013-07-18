@@ -93,6 +93,70 @@ pdf_pages.savefig(fig)
 pdf_pages.close()
 
 
+#Analysis on readmissions
+
+adm_dis_pat_group = adm_dis_df.groupby(['pat_id'])
+readmission_freq = adm_dis_pat_group['enc_id'].count()
+readmission_freq = readmission_freq.tolist()
+#Subtract 1 as the first time is not readmission
+readmission_freq = [x-1 for x in readmission_freq]
+pdf_pages = PdfPages('Readmission_dist.pdf')
+fig =plt.figure()
+readmission_density = gaussian_kde(readmission_freq)
+xs = np.linspace(0,np.max(readmission_freq),200)
+readmission_density.covariance_factor = lambda : .25
+readmission_density._compute_covariance()
+case_plot, = plt.plot(xs,readmission_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Readmission')
+plt.ylabel('Density')
+plt.title('Readmission distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
+
+
+#Analysis number of vitals per visit
+vitals_enc_group = vitals.groupby(['enc_id'])
+num_vitals_per_visit = vitals_enc_group['fsd_id'].count()
+num_vitals_per_visit = num_vitals_per_visit.tolist()
+pdf_pages = PdfPages('Vitals_per_visit_dist.pdf')
+fig =plt.figure()
+vitals_per_visit_density = gaussian_kde(num_vitals_per_visit)
+#xs = np.linspace(0,np.max(num_vitals_per_visit),200)
+xs = np.linspace(0,3000,200)
+vitals_per_visit_density.covariance_factor = lambda : .25
+vitals_per_visit_density._compute_covariance()
+case_plot, = plt.plot(xs,vitals_per_visit_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Vitals per Visit')
+plt.ylabel('Density')
+plt.title('Number of vitals per visit distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
+
+
+#Analysis on number of labs per visit
+labs_enc_group = labs.groupby(['pat_id'])
+num_labs_per_visit = labs_enc_group['proc_code'].count()
+num_labs_per_visit = num_labs_per_visit.tolist()
+pdf_pages = PdfPages('Labs_per_visit_dist.pdf')
+fig =plt.figure()
+labs_per_visit_density = gaussian_kde(num_labs_per_visit)
+#xs = np.linspace(0,np.max(num_labs_per_visit),200)
+xs = np.linspace(0,20000,200)
+labs_per_visit_density.covariance_factor = lambda : .25
+labs_per_visit_density._compute_covariance()
+case_plot, = plt.plot(xs,labs_per_visit_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Lab Tests per Visit')
+plt.ylabel('Density')
+plt.title('Number of Lab Tests per visit distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
+
 #Analyzing vitals and lab data for patients
 
 vitals_pat_enc_group = vitals.groupby(['pat_id', 'enc_id'])
