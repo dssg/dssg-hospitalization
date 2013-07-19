@@ -169,3 +169,80 @@ labs_pat_enc_group = labs.groupby(['pat_id', 'enc_id'])
 min_time_labs = labs_pat_enc_group['result_time'].min()
 max_time_labs = labs_pat_enc_group['result_time'].max()
 
+
+labs_adm = labs[ labs['enc_id'].isin( adm_dis_df['enc_id'].unique())]
+
+labs_adm_enc_group = labs_adm.groupby(['enc_id'])
+
+num_rows = len( labs_adm['enc_id'].unique())
+labs_around_adm = np.ndarray( shape= (num_rows,), dtype= [('pat_id', np.int64), ('enc_id', np.int64), ('before_num', np.int32), ('during_num', np.int32), ('after_num', np.int32)])
+
+cur_row = 0
+for enc_id, group in labs_adm_enc_group:
+    this_enc = adm_dis_df[ adm_dis_df['enc_id'] == enc_id]
+    pat_id = this_enc['pat_id'].tolist()[0]
+    adm_date = this_enc['adm_date'].tolist()[0]
+    dis_date = this_enc['dsc_date'].tolist()[0]
+    before_num = np.sum(group['result_time'] < adm_date)
+    after_num = np.sum(group['result_time'] > dis_date)
+    during_num = len(group) - (after_num + before_num)
+    labs_around_adm[cur_row]['pat_id'] = pat_id
+    labs_around_adm[cur_row]['enc_id'] = enc_id
+    labs_around_adm[cur_row]['before_num'] = before_num
+    labs_around_adm[cur_row]['during_num'] = during_num
+    labs_around_adm[cur_row]['after_num'] = after_num
+    cur_row = cur_row+1
+
+labs_around_adm_df = pd.DataFrame(labs_around_adm)
+
+#Plots on before after during densities
+num_labs_per_visit = labs_around_adm_df['before_num'].tolist()
+pdf_pages = PdfPages('Before_Labs_per_visit_dist.pdf')
+fig =plt.figure()
+labs_per_visit_density = gaussian_kde(num_labs_per_visit)
+#xs = np.linspace(0,np.max(num_labs_per_visit),200)
+xs = np.linspace(0,250,200)
+labs_per_visit_density.covariance_factor = lambda : .25
+labs_per_visit_density._compute_covariance()
+case_plot, = plt.plot(xs,labs_per_visit_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Lab Tests Before Visit')
+plt.ylabel('Density')
+plt.title('Number of Lab Tests Before visit distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
+
+num_labs_per_visit = labs_around_adm_df['during_num'].tolist()
+pdf_pages = PdfPages('During_Labs_per_visit_dist.pdf')
+fig =plt.figure()
+labs_per_visit_density = gaussian_kde(num_labs_per_visit)
+#xs = np.linspace(0,np.max(num_labs_per_visit),200)
+xs = np.linspace(0,3000,200)
+labs_per_visit_density.covariance_factor = lambda : .25
+labs_per_visit_density._compute_covariance()
+case_plot, = plt.plot(xs,labs_per_visit_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Lab Tests During Visit')
+plt.ylabel('Density')
+plt.title('Number of Lab Tests During visit distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
+
+num_labs_per_visit = labs_around_adm_df['after_num'].tolist()
+pdf_pages = PdfPages('After_Labs_per_visit_dist.pdf')
+fig =plt.figure()
+labs_per_visit_density = gaussian_kde(num_labs_per_visit)
+#xs = np.linspace(0,np.max(num_labs_per_visit),200)
+xs = np.linspace(0,300,200)
+labs_per_visit_density.covariance_factor = lambda : .25
+labs_per_visit_density._compute_covariance()
+case_plot, = plt.plot(xs,labs_per_visit_density(xs))
+#plt.hist(readmission_freq)
+plt.xlabel('Number of Lab Tests After Visit')
+plt.ylabel('Density')
+plt.title('Number of Lab Tests After visit distribution of the patients in the hospital')
+plt.show()
+pdf_pages.savefig(fig)
+pdf_pages.close()
