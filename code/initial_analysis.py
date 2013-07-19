@@ -138,14 +138,14 @@ pdf_pages.close()
 
 
 #Analysis on number of labs per visit
-labs_enc_group = labs.groupby(['pat_id'])
+labs_enc_group = labs.groupby(['enc_id'])
 num_labs_per_visit = labs_enc_group['proc_code'].count()
 num_labs_per_visit = num_labs_per_visit.tolist()
 pdf_pages = PdfPages('Labs_per_visit_dist.pdf')
 fig =plt.figure()
 labs_per_visit_density = gaussian_kde(num_labs_per_visit)
 #xs = np.linspace(0,np.max(num_labs_per_visit),200)
-xs = np.linspace(0,20000,200)
+xs = np.linspace(0,2000,200)
 labs_per_visit_density.covariance_factor = lambda : .25
 labs_per_visit_density._compute_covariance()
 case_plot, = plt.plot(xs,labs_per_visit_density(xs))
@@ -168,3 +168,4 @@ adm_dis = testing[['pat_id','enc_id', 'adm_date', 'dsc_date']]
 labs_pat_enc_group = labs.groupby(['pat_id', 'enc_id'])
 min_time_labs = labs_pat_enc_group['result_time'].min()
 max_time_labs = labs_pat_enc_group['result_time'].max()
+
