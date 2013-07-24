@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 
 readline.parse_and_bind('tab: complete')
+###############################################
+# Read the data files
+###############################################
 
-# Read teh data files
 labs = pd.read_csv('/glusterfs/users/HVA/HVA_data/dr_6988_labs_mod.csv')
 adm_dis_df = pd.read_csv('/glusterfs/users/HVA/HVA_data/dr_6988_final_enc_mod.csv')
 med_clar_df = pd.read_csv('/glusterfs/users/HVA/HVA_data/dr_6988_final_med_clarity_mod.csv')
@@ -25,7 +27,6 @@ vitals['flo_meas_time'] = pd.to_datetime(vitals['flo_meas_time'])
 adm_dis_df =  adm_dis_df[[x>1970 for x in [x.year for x in adm_dis_df['adm_date']]]]
 adm_dis_df =  adm_dis_df[[x>1970 for x in [x.year for x in adm_dis_df['dsc_date']]]]
 
-#Clean up where admission date is before 
 
 case_pats = adm_dis_df[adm_dis_df['case_flag'] == 1]
 cont_pats = adm_dis_df[adm_dis_df['case_flag'] == 0]
@@ -38,6 +39,10 @@ case_stay_days = np.array(case_stay.tolist())
 case_stay_days = case_stay_days/conversion_factor
 cont_stay_days = np.array(cont_stay.tolist())
 cont_stay_days = cont_stay_days/conversion_factor
+
+###############################################
+#Analysis on stay in the hospital
+###############################################
 
 pdf_pages = PdfPages('Stay_dist_case.pdf')
 
@@ -65,7 +70,10 @@ pdf_pages.savefig(fig)
 
 pdf_pages.close()
 
+###############################################
 # Analysis on ages
+###############################################
+
 pdf_pages = PdfPages('Age_dist_case.pdf')
 fig = plt.figure()
 
@@ -92,8 +100,9 @@ plt.legend([case_plot, cont_plot], ["Case Patients", "Control Patients"])
 pdf_pages.savefig(fig)
 pdf_pages.close()
 
-
+###############################################
 #Analysis on readmissions
+###############################################
 
 adm_dis_pat_group = adm_dis_df.groupby(['pat_id'])
 readmission_freq = adm_dis_pat_group['enc_id'].count()
@@ -115,8 +124,10 @@ plt.show()
 pdf_pages.savefig(fig)
 pdf_pages.close()
 
-
+###############################################
 #Analysis number of vitals per visit
+###############################################
+
 vitals_enc_group = vitals.groupby(['enc_id'])
 num_vitals_per_visit = vitals_enc_group['fsd_id'].count()
 num_vitals_per_visit = num_vitals_per_visit.tolist()
@@ -136,8 +147,10 @@ plt.show()
 pdf_pages.savefig(fig)
 pdf_pages.close()
 
-
+###############################################
 #Analysis on number of labs per visit
+###############################################
+
 labs_enc_group = labs.groupby(['enc_id'])
 num_labs_per_visit = labs_enc_group['proc_code'].count()
 num_labs_per_visit = num_labs_per_visit.tolist()
@@ -157,7 +170,9 @@ plt.show()
 pdf_pages.savefig(fig)
 pdf_pages.close()
 
+###############################################
 #Analyzing vitals and lab data for patients
+###############################################
 
 vitals_pat_enc_group = vitals.groupby(['pat_id', 'enc_id'])
 min_time_vitals = vitals_pat_enc_group['flo_meas_time'].min()
@@ -195,7 +210,10 @@ for enc_id, group in labs_adm_enc_group:
 
 labs_around_adm_df = pd.DataFrame(labs_around_adm)
 
+###############################################
 #Plots on before after during densities
+###############################################
+
 num_labs_per_visit = labs_around_adm_df['before_num'].tolist()
 pdf_pages = PdfPages('Before_Labs_per_visit_dist.pdf')
 fig =plt.figure()
@@ -246,3 +264,5 @@ plt.title('Number of Lab Tests After visit distribution of the patients in the h
 plt.show()
 pdf_pages.savefig(fig)
 pdf_pages.close()
+
+
